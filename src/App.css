@@ -235,7 +235,7 @@ html, body {
 .main-container {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: 0.6fr 1.8fr 0.6fr;
+  grid-template-columns: 0.6fr 1.5fr 0.9fr;
   gap: 10px;
   height: 100%;
 }
@@ -442,27 +442,13 @@ html, body {
 /* Person info panel - AR compact */
 .person-info {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  flex-direction: row;
+  gap: 16px;
   flex: 1;
-  max-height: 300px; /* Fixed height to prevent expansion */
   min-height: 200px; /* Minimum height to maintain layout */
-  overflow-y: auto; /* Add scrolling for long content */
-  padding-right: 8px; /* Space for scrollbar */
-}
-
-.person-info::-webkit-scrollbar {
-  width: 4px;
-}
-
-.person-info::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 2px;
-}
-
-.person-info::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #00ffff, #ff00ff);
-  border-radius: 2px;
+  overflow: visible; /* Remove scrolling */
+  align-items: flex-start;
+  flex-wrap: wrap;
 }
 
 .person-avatar {
@@ -906,4 +892,154 @@ html, body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Face scan animation */
+.face-scan-container {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  height: 200px;
+  margin: 0 auto 1rem;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+}
+
+.face-scan-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(0, 255, 255, 0.1) 45%,
+    rgba(0, 255, 255, 0.3) 50%,
+    rgba(0, 255, 255, 0.1) 55%,
+    transparent 100%
+  );
+  animation: scanAnimation 2s ease-in-out infinite;
+}
+
+.face-scan-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0.5;
+}
+
+.face-scan-corners {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 2px solid transparent;
+}
+
+.face-scan-corners::before,
+.face-scan-corners::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #00ffff;
+  box-shadow: 0 0 10px #00ffff;
+}
+
+.face-scan-corners::before {
+  top: -2px;
+  left: -2px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.face-scan-corners::after {
+  bottom: -2px;
+  right: -2px;
+  border-left: none;
+  border-top: none;
+}
+
+.face-scan-text {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: #00ffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  animation: pulseText 2s ease-in-out infinite;
+}
+
+@keyframes scanAnimation {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes pulseText {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Face recognition results */
+.face-recognition-results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 200px;
+  margin: 0 auto;
+}
+
+.face-result-image {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.face-result-image:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
+  border-color: rgba(0, 255, 255, 0.5);
+}
+
+.face-match-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, rgba(0, 255, 0, 0.1), rgba(0, 255, 255, 0.1));
+  border: 1px solid rgba(0, 255, 0, 0.3);
+  border-radius: 20px;
+  color: #00ff88;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }

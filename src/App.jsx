@@ -24,6 +24,7 @@ function App() {
   // New JARVIS state
   const [personInfo, setPersonInfo] = useState(null);
   const [isRecognizing, setIsRecognizing] = useState(false);
+  const [recognitionComplete, setRecognitionComplete] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [conversationHistory, setConversationHistory] = useState({
@@ -57,11 +58,12 @@ function App() {
   // Mock face recognition API
   const getPersonInfo = useCallback(async () => {
     setIsRecognizing(true);
+    setRecognitionComplete(false);
     setError(null);
     
     try {
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise(resolve => setTimeout(resolve, 3000));
       
       // Mock person data
       const mockPersonInfo = {
@@ -76,6 +78,7 @@ function App() {
       };
       
       setPersonInfo(mockPersonInfo);
+      setRecognitionComplete(true);
       return mockPersonInfo;
     } catch (err) {
       setError('Failed to recognize person. Please try again.');
@@ -483,9 +486,17 @@ Echo: ≤3 STAR bullets, words only.`
   const renderPersonInfo = useMemo(() => {
     if (isRecognizing) {
       return (
-        <div className="loading">
-          <div className="loading-spinner"></div>
-          Recognizing person...
+        <div style={{ padding: '1rem' }}>
+          <div className="face-scan-container">
+            <div className="face-scan-grid"></div>
+            <div className="face-scan-overlay"></div>
+            <div className="face-scan-corners"></div>
+            <div className="face-scan-text">Scanning...</div>
+          </div>
+          <div className="loading">
+            <div className="loading-spinner"></div>
+            Recognizing person...
+          </div>
         </div>
       );
     }
@@ -514,44 +525,61 @@ Echo: ≤3 STAR bullets, words only.`
     
     return (
       <div className="person-info fade-in">
-        <div className="person-avatar">
-          {personInfo.name.split(' ').map(n => n[0]).join('')}
+        {recognitionComplete && (
+          <div className="face-recognition-results">
+            <img
+              src="https://jsc6.pimeyes.com/proxy/W_U_uPN10dmkNF9mdWIu0aY3yzndT8pMVmzYjZI3O2uyr8tO5U-SZNyaUwiAhM8INlQkV2r6v0pDNP8DZiJdPs5STMDUQ25F4xDuKoGJrBi6L75iDFONZ2aEOzI-oJrWgo24myakGzkC8Lof-keU-an37KFUU-NkbJ53hy_x1XNXCVtrktir-Q07Cp_ePs7nrjEMT96FSAD9gJjqmOM3Tz_e3PtwPuKMt9LsLFDLdICCYqJhoL9W0Rml_cCyv8vO_n7QEvf8AOga0Z8to5msGI7Bo77VC9imqXd4XIiPmKc2k0sMjAWSMErKhOQjSN0xJJOhmA6BDRCTfa-GHCw94oPHFEK7OlIwMZw6FxW2HlEDuVvUKDhdZuosUiZRW8eFjLrMCEEU0ZPyTuF-tn6WKU1tkm3z-877IXfsRhNcxBrL7zkIF2TFXBV-nphGGmuBpPwF8-1lmwVNRCb9mR3YcBNZracB2t0tWFFXG9bJ5Fbq4f75SyJzq3bFJXAR8ESicQgVeBAG2bWe1HvZPZmL2E1hzeyQE_dbF1O_qO6_NYVI91_zq1XcRdMurxYoPnpazjUtc_Bzgo8-IaQJvuRAMK7H3X5FeczuS2BAJnaQwuLMJ4Ikhmp4H_guBmcxUIE90cX0dswyGudqna6uu8IB12O87wPD8XHbEOGGMTKVyGw="
+              alt="Recognized Face 1"
+              className="face-result-image"
+            />
+            <img
+              src="https://jsc14.pimeyes.com/proxy/8A3QuwjNgHtHN_F8RG8y8FhgbIm1cOUhn3RhmfxGHDW6w-erI2CIaMtPb_jXY5RApczQATl27AwlbCsdHRdhbHWvXtm14_6j7d8Xjo1_chcOSvlu0EA4ISFUnKCW41r_5Zf6xyz0tvV4lR0PkK49afbZmfi_A2dkTuJ-PosAd33-iunY57x6keOLQ6dA6M44AVoP1k87LpiIosXbd4ECPZPGZOkVOftXue_xkR1p_fMe-31x5F1IJd1MUMdYEX5gXQ5wqGAY9sw_D_V-lbcsXggvvcTnYKx1SqVOBne7kqZteMIF4e6fPKy4JnhEr4s5VfYqPosBj3c18NxYWqxUi9jRQWlmLZ2GhWQQ1_FLJ2G6QRzQ4UEFzc7e-Y4Mqtd6iVcr3mxL3QbVYjaD0RY_r0CliZaPoInotOeIX416MxqOxvs6hX8514xPicith28XvXq1TWVPmcKlfu51iXg4k5uBCwZD3KBZn-gDfna0jF8qTjW_uJlLaE6ccELBQ7uB_0d0DVDxLad8YbX449_90kBS-iEPIktLSQjW160PV4yCTgPPHe-ox3KIPpZHke-ADnW6jrMDeGM90T6rS3Sjf8Cl1cMSeec97LzQtOTKSlJ2I1XHl-3f0ITzEFYXDIjqdIkWRw4miYq8z6aoO9lAplZ4saCI9l8URK7wMEb_sdqomAnreEvua__PVpBnVwOiSf4khM3Uq0fuP7rlHm5zXoFx1V53pBmbYJEAFWnFaB_low3D-ULSZD_4_oAIZU2vQgOQ9hCQy5qCGwsq9fdILg=="
+              alt="Recognized Face 2"
+              className="face-result-image"
+            />
+            <div className="face-match-indicator">
+              <span>✓</span>
+              <span>Face Match Found</span>
+            </div>
+          </div>
+        )}
+        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, gap: '12px' }}>
+          <div className="person-name">{personInfo.name}</div>
+          <div className="person-job">{personInfo.job}</div>
+          {personInfo.company && (
+            <div className="detail-item">
+              <span className="detail-label">Company:</span>
+              <span>{personInfo.company}</span>
+            </div>
+          )}
+          {personInfo.bio && (
+            <div className="detail-item">
+              <span className="detail-label">Bio:</span>
+              <span>{personInfo.bio}</span>
+            </div>
+          )}
+          {personInfo.interests && (
+            <div className="detail-item">
+              <span className="detail-label">Interests:</span>
+              <span>{personInfo.interests.join(', ')}</span>
+            </div>
+          )}
+          {personInfo.lastMet && (
+            <div className="detail-item">
+              <span className="detail-label">Last Met:</span>
+              <span>{personInfo.lastMet}</span>
+            </div>
+          )}
+          {personInfo.notes && (
+            <div className="detail-item">
+              <span className="detail-label">Notes:</span>
+              <span>{personInfo.notes}</span>
+            </div>
+          )}
         </div>
-        <div className="person-name">{personInfo.name}</div>
-        <div className="person-job">{personInfo.job}</div>
-        {personInfo.company && (
-          <div className="detail-item">
-            <span className="detail-label">Company:</span>
-            <span>{personInfo.company}</span>
-          </div>
-        )}
-        {personInfo.bio && (
-          <div className="detail-item">
-            <span className="detail-label">Bio:</span>
-            <span>{personInfo.bio}</span>
-          </div>
-        )}
-        {personInfo.interests && (
-          <div className="detail-item">
-            <span className="detail-label">Interests:</span>
-            <span>{personInfo.interests.join(', ')}</span>
-          </div>
-        )}
-        {personInfo.lastMet && (
-          <div className="detail-item">
-            <span className="detail-label">Last Met:</span>
-            <span>{personInfo.lastMet}</span>
-          </div>
-        )}
-        {personInfo.notes && (
-          <div className="detail-item">
-            <span className="detail-label">Notes:</span>
-            <span>{personInfo.notes}</span>
-          </div>
-        )}
       </div>
     );
-  }, [isRecognizing, personInfo]);
+  }, [isRecognizing, personInfo, recognitionComplete]);
 
   // Render AI suggestions with individual refs for auto-scroll
   const renderAISuggestions = useMemo(() => {
@@ -691,7 +719,6 @@ Echo: ≤3 STAR bullets, words only.`
         
         <div className="glass-panel">
           <div className="panel-title">
-            <div className="panel-icon">👤</div>
             Research Face Recognition
           </div>
           {renderPersonInfo}
