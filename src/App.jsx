@@ -102,21 +102,17 @@ function App() {
       const response = await fetch(photoData);
       const blob = await response.blob();
       
-      // Create form data for API request
+      // Create form data for API request using correct field names
       const formData = new FormData();
-      formData.append('image', blob, 'captured-image.jpg');
+      formData.append('file', blob, 'captured-image.jpg'); // Use 'file' as field name
+      formData.append('headless', 'false'); // Add headless parameter
+      formData.append('wait_time', '150'); // Add wait_time parameter
       
-      // Call real face recognition API
-      const apiResponse = await fetch('http://localhost:8000/api/v1/automation/upload-image', {
+      // Call real face recognition API with the correct endpoint and multipart format
+      const apiResponse = await fetch('http://localhost:8000/api/v1/automation/upload-image-file', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          image_path: "app/test_data/image.webp",
-          headless: false,
-          wait_time: 150
-        })
+        // Don't set Content-Type header when sending FormData - browser sets it automatically with boundary
+        body: formData // Send the FormData with the actual captured image
       });
       
       if (!apiResponse.ok) {
