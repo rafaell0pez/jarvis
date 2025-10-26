@@ -32,6 +32,8 @@ function App() {
     lastAnalyzed: 0
   });
   const [error, setError] = useState(null);
+  const [cameraPermission, setCameraPermission] = useState('pending');
+  const [capturedImage, setCapturedImage] = useState(null);
   
   // Refs
   const socketRef = useRef(null);
@@ -39,6 +41,9 @@ function App() {
   const streamRef = useRef(null);
   const analysisIntervalRef = useRef(null);
   const transcriptBoxRef = useRef(null);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const cameraStreamRef = useRef(null);
 
   // Keyword detection for "banana"
   const detectBananaKeyword = useCallback((text) => {
@@ -55,13 +60,43 @@ function App() {
     return colorMap;
   }, [activeSpeakers]);
 
-  // Mock face recognition API
-  const getPersonInfo = useCallback(async () => {
+  // Capture photo from camera
+  const capturePhoto = useCallback(() => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d');
+      
+      // Set canvas dimensions to match video
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      // Draw current video frame to canvas
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      // Convert canvas to image data URL
+      const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+      setCapturedImage(imageDataUrl);
+      
+      return imageDataUrl;
+    }
+    return null;
+  }, []);
+
+  // Mock face recognition API with captured image
+  const getPersonInfo = useCallback(async (imageDataUrl = null) => {
     setIsRecognizing(true);
     setRecognitionComplete(false);
     setError(null);
     
     try {
+      // If no image provided, capture one
+      const photoData = imageDataUrl || capturePhoto();
+      
+      if (!photoData) {
+        throw new Error('Failed to capture photo');
+      }
+      
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 3000));
       
@@ -74,7 +109,8 @@ function App() {
         bio: 'Specializing in natural language processing and computer vision with 8 years of experience in developing cutting-edge AI solutions.',
         interests: ['Machine Learning', 'Computer Vision', 'Quantum Computing', 'Ethical AI'],
         lastMet: 'Tech Conference 2024',
-        notes: 'Interested in collaborative research on multimodal AI systems.'
+        notes: 'Interested in collaborative research on multimodal AI systems.',
+        capturedImage: photoData // Store the captured image
       };
       
       setPersonInfo(mockPersonInfo);
@@ -86,7 +122,7 @@ function App() {
     } finally {
       setIsRecognizing(false);
     }
-  }, []);
+  }, [capturePhoto]);
 
   // Cache for API responses to reduce redundant calls
   const apiCacheRef = useRef(new Map());
@@ -291,6 +327,36 @@ function App() {
     }
   }, [conversationHistory.segments, isTranscribing, debouncedAnalysis]);
 
+  // Initialize camera on component mount or when requested
+  const initializeCamera = async () => {
+    try {
+      const cameraStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: 'user'
+        }
+      });
+      cameraStreamRef.current = cameraStream;
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = cameraStream;
+      }
+      
+      setCameraPermission('granted');
+      setError(null); // Clear any previous camera error
+    } catch (err) {
+      console.error('Camera access denied:', err);
+      setCameraPermission('denied');
+      setError('Camera access is required for face recognition. Please click "Enable Camera" button and allow camera access.');
+    }
+  };
+
+  // Request camera access with user interaction
+  const requestCameraAccess = async () => {
+    await initializeCamera();
+  };
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -302,6 +368,9 @@ function App() {
       }
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
+      }
+      if (cameraStreamRef.current) {
+        cameraStreamRef.current.getTracks().forEach(track => track.stop());
       }
     };
   }, []);
@@ -466,16 +535,13 @@ function App() {
       <div className="person-info fade-in">
         {recognitionComplete && (
           <div className="face-recognition-results">
-            <img
-              src="https://jsc6.pimeyes.com/proxy/W_U_uPN10dmkNF9mdWIu0aY3yzndT8pMVmzYjZI3O2uyr8tO5U-SZNyaUwiAhM8INlQkV2r6v0pDNP8DZiJdPs5STMDUQ25F4xDuKoGJrBi6L75iDFONZ2aEOzI-oJrWgo24myakGzkC8Lof-keU-an37KFUU-NkbJ53hy_x1XNXCVtrktir-Q07Cp_ePs7nrjEMT96FSAD9gJjqmOM3Tz_e3PtwPuKMt9LsLFDLdICCYqJhoL9W0Rml_cCyv8vO_n7QEvf8AOga0Z8to5msGI7Bo77VC9imqXd4XIiPmKc2k0sMjAWSMErKhOQjSN0xJJOhmA6BDRCTfa-GHCw94oPHFEK7OlIwMZw6FxW2HlEDuVvUKDhdZuosUiZRW8eFjLrMCEEU0ZPyTuF-tn6WKU1tkm3z-877IXfsRhNcxBrL7zkIF2TFXBV-nphGGmuBpPwF8-1lmwVNRCb9mR3YcBNZracB2t0tWFFXG9bJ5Fbq4f75SyJzq3bFJXAR8ESicQgVeBAG2bWe1HvZPZmL2E1hzeyQE_dbF1O_qO6_NYVI91_zq1XcRdMurxYoPnpazjUtc_Bzgo8-IaQJvuRAMK7H3X5FeczuS2BAJnaQwuLMJ4Ikhmp4H_guBmcxUIE90cX0dswyGudqna6uu8IB12O87wPD8XHbEOGGMTKVyGw="
-              alt="Recognized Face 1"
-              className="face-result-image"
-            />
-            <img
-              src="https://jsc14.pimeyes.com/proxy/8A3QuwjNgHtHN_F8RG8y8FhgbIm1cOUhn3RhmfxGHDW6w-erI2CIaMtPb_jXY5RApczQATl27AwlbCsdHRdhbHWvXtm14_6j7d8Xjo1_chcOSvlu0EA4ISFUnKCW41r_5Zf6xyz0tvV4lR0PkK49afbZmfi_A2dkTuJ-PosAd33-iunY57x6keOLQ6dA6M44AVoP1k87LpiIosXbd4ECPZPGZOkVOftXue_xkR1p_fMe-31x5F1IJd1MUMdYEX5gXQ5wqGAY9sw_D_V-lbcsXggvvcTnYKx1SqVOBne7kqZteMIF4e6fPKy4JnhEr4s5VfYqPosBj3c18NxYWqxUi9jRQWlmLZ2GhWQQ1_FLJ2G6QRzQ4UEFzc7e-Y4Mqtd6iVcr3mxL3QbVYjaD0RY_r0CliZaPoInotOeIX416MxqOxvs6hX8514xPicith28XvXq1TWVPmcKlfu51iXg4k5uBCwZD3KBZn-gDfna0jF8qTjW_uJlLaE6ccELBQ7uB_0d0DVDxLad8YbX449_90kBS-iEPIktLSQjW160PV4yCTgPPHe-ox3KIPpZHke-ADnW6jrMDeGM90T6rS3Sjf8Cl1cMSeec97LzQtOTKSlJ2I1XHl-3f0ITzEFYXDIjqdIkWRw4miYq8z6aoO9lAplZ4saCI9l8URK7wMEb_sdqomAnreEvua__PVpBnVwOiSf4khM3Uq0fuP7rlHm5zXoFx1V53pBmbYJEAFWnFaB_low3D-ULSZD_4_oAIZU2vQgOQ9hCQy5qCGwsq9fdILg=="
-              alt="Recognized Face 2"
-              className="face-result-image"
-            />
+            {personInfo.capturedImage && (
+              <img
+                src={personInfo.capturedImage}
+                alt="Captured Face"
+                className="face-result-image captured-image"
+              />
+            )}
             <div className="face-match-indicator">
               <span>✓</span>
               <span>Face Match Found</span>
@@ -631,6 +697,25 @@ function App() {
         </div>
       )}
       
+      {/* Camera preview and hidden canvas for photo capture */}
+      <div className="camera-container">
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+          className="camera-preview"
+          style={{
+            display: cameraPermission === 'granted' ? 'block' : 'none'
+          }}
+        />
+        <canvas
+          ref={canvasRef}
+          className="hidden-canvas"
+          style={{ display: 'none' }}
+        />
+      </div>
+      
       <div className="main-container">
         <div className="glass-panel">
           <div className="panel-title">
@@ -671,6 +756,22 @@ function App() {
           className="toggle-button"
         >
           {isTranscribing ? 'Stop' : 'Start'}
+        </button>
+        
+        <button
+          type="button"
+          onClick={requestCameraAccess}
+          className="toggle-button"
+          style={{
+            background: cameraPermission === 'granted' 
+              ? 'linear-gradient(135deg, rgba(0, 255, 0, 0.2), rgba(0, 255, 128, 0.2))'
+              : 'linear-gradient(135deg, rgba(255, 100, 0, 0.2), rgba(255, 150, 0, 0.2))',
+            borderColor: cameraPermission === 'granted' 
+              ? 'rgba(0, 255, 0, 0.4)'
+              : 'rgba(255, 100, 0, 0.4)'
+          }}
+        >
+          {cameraPermission === 'granted' ? '✓ Camera On' : 'Enable Camera'}
         </button>
         
         <button
