@@ -1,12 +1,126 @@
-# React + Vite
+# 🕶️ Jarvis — AI Networking Assistant for Meta Glasses  
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> **“Because LinkedIn is for amateurs.”**  
+Jarvis transforms Meta Glasses into a real-time networking assistant — recognizing faces, recalling names, and generating AI-powered conversation cues during in-person interactions.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Overview  
 
-## Expanding the ESLint configuration
+**Cluely** uses live speech transcription, facial recognition, and conversational AI to enhance real-world interactions.  
+It helps you *remember people, recall context, and sound sharp — instantly.*
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Core Capabilities  
+- **Facial Recognition** – Identify and recall people in real time  
+- **Live Transcription** – Multi-speaker diarization with low latency  
+- **AI Conversation Hints** – Context-aware, adaptive dialogue prompts  
+- **Voice Commands** – Say “banana” to trigger recognition  
+- **On-Glasses UI** – Optimized interface for Meta Glasses streaming  
+
+---
+
+## 🧠 Tech Stack  
+
+### Frontend  
+- **React 19 + Vite** – Fast, modular UI  
+- **WebRTC APIs** – Camera and mic access for live recognition  
+- **CSS3 (Glassmorphism)** – Lightweight visual effects  
+
+### Backend  
+- **FastAPI + SQLModel + PostgreSQL** – Async Python stack  
+- **Docker Compose** – Unified deployment  
+- **Face Recognition API** – Custom image-matching service  
+
+### AI & APIs  
+- **Deepgram Nova-3** – Real-time speech-to-text  
+- **OpenRouter (Grok-4-Fast)** – Conversation intelligence model  
+
+---
+
+## ⚙️ Setup  
+
+### Prerequisites  
+- Node.js 18+ and npm/pnpm  
+- Python 3.10+ with [UV](https://docs.astral.sh/uv)  
+- Deepgram + OpenRouter API keys  
+- Docker (optional)  
+
+### Frontend  
+```bash
+npm install
+npm run dev
+```
+
+### Backend  
+```bash
+cd backend
+uv sync --dev
+uv run uvicorn app.main:app --reload
+```
+
+Access the app at:  
+- Frontend → `http://localhost:5173`  
+- Backend → `http://localhost:8000`  
+
+---
+
+## 📂 Project Structure  
+
+```
+.
+├── src/           # React frontend
+│   ├── App.jsx
+│   ├── main.jsx
+│   └── styles/
+├── backend/       # FastAPI service
+│   ├── app/
+│   ├── Dockerfile
+│   └── pyproject.toml
+└── public/        # Static assets
+```
+
+---
+
+## 🔑 Environment Variables  
+
+| Variable | Description |
+|-----------|-------------|
+| `VITE_DEEPGRAM_API_KEY` | Deepgram speech-to-text |
+| `VITE_OPENROUTER_API_KEY` | OpenRouter AI models |
+| `DATABASE_URL` | PostgreSQL connection string |
+| `SECRET_KEY` | Backend secret key |
+| `ENVIRONMENT` | `local`, `staging`, or `production` |
+
+---
+
+## 🧩 Usage  
+
+1. **Enable Camera** → Allow facial recognition access  
+2. **Start Transcription** → Begin real-time analysis  
+3. **Say “banana”** → Trigger face identification  
+4. **View Suggestions** → Watch AI conversation prompts appear  
+
+---
+
+## 🧪 Development Commands  
+
+### Frontend  
+```bash
+npm run build
+npm run preview
+npm run lint
+```
+
+### Backend  
+```bash
+make run
+make check
+make test
+```
+
+---
+
+## 🧾 License  
+
+This project was developed for Calhacks 12.0.  
+© 2025
