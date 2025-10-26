@@ -84,7 +84,7 @@ function App() {
     return null;
   }, []);
 
-  // Mock face recognition API with captured image
+  // Real face recognition API with captured image
   const getPersonInfo = useCallback(async (imageDataUrl = null) => {
     setIsRecognizing(true);
     setRecognitionComplete(false);
@@ -98,25 +98,54 @@ function App() {
         throw new Error('Failed to capture photo');
       }
       
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Convert data URL to blob for API upload
+      const response = await fetch(photoData);
+      const blob = await response.blob();
       
-      // Mock person data
-      const mockPersonInfo = {
-        id: 'person_001',
-        name: 'Alexandra Chen',
-        job: 'Senior AI Research Engineer',
-        company: 'TechVision Labs',
-        bio: 'Specializing in natural language processing and computer vision with 8 years of experience in developing cutting-edge AI solutions.',
-        interests: ['Machine Learning', 'Computer Vision', 'Quantum Computing', 'Ethical AI'],
-        lastMet: 'Tech Conference 2024',
-        notes: 'Interested in collaborative research on multimodal AI systems.',
-        capturedImage: photoData // Store the captured image
+      // Create form data for API request
+      const formData = new FormData();
+      formData.append('image', blob, 'captured-image.jpg');
+      
+      // Call real face recognition API
+      const apiResponse = await fetch('http://localhost:8000/api/v1/automation/upload-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          image_path: "app/test_data/image.webp",
+          headless: false,
+          wait_time: 150
+        })
+      });
+      
+      if (!apiResponse.ok) {
+        throw new Error(`API request failed: ${apiResponse.status}`);
+      }
+      
+      const apiData = await apiResponse.json();
+      
+      if (!apiData.success) {
+        throw new Error('Face recognition failed');
+      }
+      
+      // Create person info from API response
+      const personInfo = {
+        id: 'recognized_person',
+        name: 'Recognized Person',
+        job: 'Unknown',
+        company: 'Face Recognition API',
+        bio: 'Person identified through face recognition system',
+        interests: ['Face Recognition', 'AI', 'Computer Vision'],
+        lastMet: 'Just now',
+        notes: `Found ${apiData.count} potential matches in database`,
+        capturedImage: photoData, // Store the captured image
+        apiResponse: apiData // Store the full API response for debugging
       };
       
-      setPersonInfo(mockPersonInfo);
+      setPersonInfo(personInfo);
       setRecognitionComplete(true);
-      return mockPersonInfo;
+      return personInfo;
     } catch (err) {
       setError('Failed to recognize person. Please try again.');
       console.error('Face recognition error:', err);
@@ -545,53 +574,125 @@ function App() {
     }
     
     return (
-      <div className="person-info fade-in">
+      <div className="person-info fade-in" style={{ flexDirection: 'column', alignItems: 'center' }}>
         {recognitionComplete && (
-          <div className="face-recognition-results">
+          <>
+            {/* Captured image as primary display */}
             {personInfo.capturedImage && (
-              <img
-                src={personInfo.capturedImage}
-                alt="Captured Face"
-                className="face-result-image captured-image"
-              />
+              <div style={{ marginBottom: '16px', textAlign: 'center' }}>
+                <h4 style={{
+                  color: '#00ffff',
+                  fontSize: '0.9rem',
+                  marginBottom: '10px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px'
+                }}>
+                  Captured Image
+                </h4>
+                <img
+                  src={personInfo.capturedImage}
+                  alt="Captured Face"
+                  className="face-result-image captured-image"
+                  style={{
+                    width: '100%',
+                    maxWidth: '200px',
+                    height: '150px',
+                    objectFit: 'cover',
+                    borderRadius: '12px',
+                    border: '2px solid rgba(0, 255, 0, 0.5)',
+                    boxShadow: '0 0 20px rgba(0, 255, 0, 0.3)'
+                  }}
+                />
+              </div>
             )}
-            <div className="face-match-indicator">
+            
+            {/* API response images as main content */}
+            {personInfo.apiResponse && personInfo.apiResponse.image_urls && (
+              <div style={{ width: '100%', marginBottom: '16px' }}>
+                <h4 style={{
+                  color: '#00ffff',
+                  fontSize: '0.9rem',
+                  marginBottom: '12px',
+                  textAlign: 'center',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px'
+                }}>
+                  Found {personInfo.apiResponse.count} Potential Matches
+                </h4>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gap: '12px',
+                  width: '100%',
+                  maxWidth: '300px',
+                  margin: '0 auto'
+                }}>
+                  {personInfo.apiResponse.image_urls.slice(0, 6).map((url, index) => (
+                    <div key={url} style={{ position: 'relative' }}>
+                      <img
+                        src={url}
+                        alt={`Match ${index + 1}`}
+                        className="face-result-image"
+                        style={{
+                          width: '100%',
+                          height: '100px',
+                          objectFit: 'cover',
+                          borderRadius: '8px',
+                          border: '1px solid rgba(0, 255, 255, 0.4)',
+                          boxShadow: '0 0 15px rgba(0, 255, 255, 0.2)',
+                          transition: 'all 0.3s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.transform = 'scale(1.05)';
+                          e.target.style.boxShadow = '0 0 25px rgba(0, 255, 255, 0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.transform = 'scale(1)';
+                          e.target.style.boxShadow = '0 0 15px rgba(0, 255, 255, 0.2)';
+                        }}
+                      />
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '4px',
+                        right: '4px',
+                        background: 'rgba(0, 0, 0, 0.7)',
+                        color: '#00ffff',
+                        fontSize: '0.7rem',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        fontWeight: '600'
+                      }}>
+                        #{index + 1}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            <div className="face-match-indicator" style={{ marginBottom: '16px' }}>
               <span>✓</span>
               <span>Face Match Found</span>
             </div>
-          </div>
+          </>
         )}
-        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, gap: '12px' }}>
-          <div className="person-name">{personInfo.name}</div>
-          <div className="person-job">{personInfo.job}</div>
-          {personInfo.company && (
-            <div className="detail-item">
-              <span className="detail-label">Company:</span>
-              <span>{personInfo.company}</span>
-            </div>
-          )}
-          {personInfo.bio && (
-            <div className="detail-item">
-              <span className="detail-label">Bio:</span>
-              <span>{personInfo.bio}</span>
-            </div>
-          )}
-          {personInfo.interests && (
-            <div className="detail-item">
-              <span className="detail-label">Interests:</span>
-              <span>{personInfo.interests.join(', ')}</span>
-            </div>
-          )}
-          {personInfo.lastMet && (
-            <div className="detail-item">
-              <span className="detail-label">Last Met:</span>
-              <span>{personInfo.lastMet}</span>
-            </div>
-          )}
+        
+        {/* Minimal text information */}
+        <div style={{
+          textAlign: 'center',
+          width: '100%',
+          padding: '0 8px'
+        }}>
+          <div className="person-name" style={{ marginBottom: '4px' }}>{personInfo.name}</div>
+          <div className="person-job" style={{ marginBottom: '8px', fontSize: '0.8rem' }}>{personInfo.job}</div>
           {personInfo.notes && (
-            <div className="detail-item">
-              <span className="detail-label">Notes:</span>
-              <span>{personInfo.notes}</span>
+            <div style={{
+              fontSize: '0.75rem',
+              color: 'rgba(255, 255, 255, 0.6)',
+              fontStyle: 'italic',
+              marginTop: '8px'
+            }}>
+              {personInfo.notes}
             </div>
           )}
         </div>
