@@ -1,9 +1,8 @@
 # 🕶️ Jarvis — AI Networking Assistant for Meta Glasses  
 
-> **“Because LinkedIn is for amateurs.”**  
+ **“Because LinkedIn is for amateurs.”**  
 Jarvis transforms Meta Glasses into a real-time networking assistant — recognizing faces, recalling names, and generating AI-powered conversation cues during in-person interactions.
 
----
 
 ## 🚀 Overview  
 
@@ -17,7 +16,7 @@ It helps you *remember people, recall context, and sound sharp — instantly.*
 - **Voice Commands** – Say “banana” to trigger recognition  
 - **On-Glasses UI** – Optimized interface for Meta Glasses streaming  
 
----
+ 
 
 ## 🧠 Tech Stack  
 
@@ -35,7 +34,7 @@ It helps you *remember people, recall context, and sound sharp — instantly.*
 - **Deepgram Nova-3** – Real-time speech-to-text  
 - **OpenRouter (Grok-4-Fast)** – Conversation intelligence model  
 
----
+ 
 
 ## ⚙️ Setup  
 
@@ -62,7 +61,7 @@ Access the app at:
 - Frontend → `http://localhost:5173`  
 - Backend → `http://localhost:8000`  
 
----
+ 
 
 ## 📂 Project Structure  
 
@@ -79,19 +78,19 @@ Access the app at:
 └── public/        # Static assets
 ```
 
----
+ 
 
 ## 🔑 Environment Variables  
 
 | Variable | Description |
-|-----------|-------------|
+|   --|    -|
 | `VITE_DEEPGRAM_API_KEY` | Deepgram speech-to-text |
 | `VITE_OPENROUTER_API_KEY` | OpenRouter AI models |
 | `DATABASE_URL` | PostgreSQL connection string |
 | `SECRET_KEY` | Backend secret key |
 | `ENVIRONMENT` | `local`, `staging`, or `production` |
 
----
+ 
 
 ## 🧩 Usage  
 
@@ -100,7 +99,7 @@ Access the app at:
 3. **Say “banana”** → Trigger face identification  
 4. **View Suggestions** → Watch AI conversation prompts appear  
 
----
+ 
 
 ## 🧪 Development Commands  
 
@@ -118,7 +117,7 @@ make check
 make test
 ```
 
----
+ 
 
 ## 🧾 License  
 
