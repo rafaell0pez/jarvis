@@ -244,24 +244,17 @@ function App() {
     }
   }, [aiSuggestions]);
 
-  // Auto-scroll to latest AI suggestion - Fixed to hide old suggestions
+  // Auto-scroll to bottom of AI suggestions container
   const aiSuggestionsRef = useRef(null);
   const suggestionRefs = useRef([]);
   const latestSuggestionRef = useRef(null);
-  
+
   useEffect(() => {
     if (aiSuggestionsRef.current && aiSuggestions.length > 0) {
       // Small delay to ensure DOM is updated
       setTimeout(() => {
-        // Scroll to the latest suggestion
-        const latestIndex = aiSuggestions.length - 1;
-        if (suggestionRefs.current[latestIndex]) {
-          suggestionRefs.current[latestIndex].scrollIntoView({
-            behavior: 'smooth',
-            block: 'end',
-            inline: 'nearest'
-          });
-        }
+        // Scroll to the bottom of the AI suggestions container
+        aiSuggestionsRef.current.scrollTop = aiSuggestionsRef.current.scrollHeight;
       }, 100);
     }
   }, [aiSuggestions]);
@@ -558,16 +551,6 @@ function App() {
           padding: '2rem',
           letterSpacing: '0.5px'
         }}>
-          <img
-            src="/face-recognition.jpg"
-            alt="Face Recognition Research"
-            style={{
-              width: '100%',
-              maxWidth: '300px',
-              borderRadius: '8px',
-              marginBottom: '1rem'
-            }}
-          />
           Say "banana" to trigger face recognition
         </div>
       );
@@ -577,35 +560,6 @@ function App() {
       <div className="person-info fade-in" style={{ flexDirection: 'column', alignItems: 'center' }}>
         {recognitionComplete && (
           <>
-            {/* Captured image as primary display */}
-            {personInfo.capturedImage && (
-              <div style={{ marginBottom: '16px', textAlign: 'center' }}>
-                <h4 style={{
-                  color: '#00ffff',
-                  fontSize: '0.9rem',
-                  marginBottom: '10px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '1px'
-                }}>
-                  Captured Image
-                </h4>
-                <img
-                  src={personInfo.capturedImage}
-                  alt="Captured Face"
-                  className="face-result-image captured-image"
-                  style={{
-                    width: '100%',
-                    maxWidth: '200px',
-                    height: '150px',
-                    objectFit: 'cover',
-                    borderRadius: '12px',
-                    border: '2px solid rgba(0, 255, 0, 0.5)',
-                    boxShadow: '0 0 20px rgba(0, 255, 0, 0.3)'
-                  }}
-                />
-              </div>
-            )}
-            
             {/* API response images as main content */}
             {personInfo.apiResponse && personInfo.apiResponse.image_urls && (
               <div style={{ width: '100%', marginBottom: '16px' }}>

@@ -551,6 +551,8 @@ html, body {
   position: relative;
   display: flex;
   flex-direction: column;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
 }
 
 .ai-suggestions::before {
@@ -570,18 +572,16 @@ html, body {
 }
 
 .ai-suggestions::-webkit-scrollbar {
-  width: 3px;
+  width: 0;
+  display: none;
 }
 
 .ai-suggestions::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 2px;
+  display: none;
 }
 
 .ai-suggestions::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #00ff88, #00ffff);
-  border-radius: 2px;
-  box-shadow: 0 0 5px rgba(0, 255, 200, 0.3);
+  display: none;
 }
 
 .ai-suggestion {
@@ -595,7 +595,7 @@ html, body {
   border: 1px solid rgba(0, 255, 136, 0.3);
   transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   backdrop-filter: blur(20px) saturate(150%);
   box-shadow:
     0 4px 20px rgba(0, 255, 136, 0.2),
