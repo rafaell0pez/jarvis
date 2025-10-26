@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev:*)",
+      "Bash(pnpm install)",
+      "Bash(pnpm run dev)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
