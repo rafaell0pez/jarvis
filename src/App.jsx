@@ -44,6 +44,7 @@ function App() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const cameraStreamRef = useRef(null);
+  const rawDataRef = useRef(null);
 
   // Keyword detection for "banana"
   const detectBananaKeyword = useCallback((text) => {
@@ -246,6 +247,17 @@ function App() {
       }, 100);
     }
   }, [transcriptSegments]);
+
+  // Auto-scroll to latest raw data response
+  useEffect(() => {
+    if (rawDataRef.current && rawResponses.length > 0 && showRawData) {
+      // Small delay to ensure DOM is updated
+      setTimeout(() => {
+        // Scroll to the bottom of the raw data container
+        rawDataRef.current.scrollTop = rawDataRef.current.scrollHeight;
+      }, 100);
+    }
+  }, [rawResponses, showRawData]);
 
   // Enhanced conversation analysis with more frequent updates and intelligent throttling
   const lastAnalyzedRef = useRef(Date.now());
@@ -513,8 +525,9 @@ function App() {
       return (
         <div style={{
           textAlign: 'center',
-          color: 'rgba(255, 255, 255, 0.6)',
-          padding: '2rem'
+          color: '#A0A0A0',
+          padding: '2rem',
+          letterSpacing: '0.5px'
         }}>
           <img
             src="/face-recognition.jpg"
@@ -596,29 +609,35 @@ function App() {
         </div>
       );
     }
-    
+
     if (aiSuggestions.length === 0) {
       return (
         <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
           textAlign: 'center',
-          color: 'rgba(255, 255, 255, 0.6)',
-          padding: '2rem'
+          color: '#A0A0A0',
+          padding: '2rem',
+          letterSpacing: '0.5px'
         }}>
           Start a conversation to get AI suggestions
         </div>
       );
     }
-    
-    return aiSuggestions.map((suggestion, index) => (
+
+    // Reverse the array to show most recent first
+    return [...aiSuggestions].reverse().map((suggestion, index) => (
       <div
         key={suggestion.id}
         ref={el => {
-          // Store ref for the latest suggestion
-          if (index === aiSuggestions.length - 1) {
+          // Store ref for the latest suggestion (now at index 0 after reverse)
+          if (index === 0) {
             latestSuggestionRef.current = el;
           }
         }}
-        className="ai-suggestion fade-in"
+        className={`ai-suggestion ${index === 0 ? 'slide-in-top' : 'fade-in'}`}
       >
         <div className="suggestion-text">{suggestion.text}</div>
         <div className="suggestion-timestamp">
@@ -653,9 +672,9 @@ function App() {
   // Render raw data viewer for debugging
   const renderRawData = useMemo(() => {
     if (!showRawData) return null;
-    
+
     return (
-      <div className="raw-data-container">
+      <div ref={rawDataRef} className="raw-data-container">
         <h3>Raw API Responses (Last 10):</h3>
         {rawResponses.map((response, index) => (
           <div key={`${response.timestamp}-${index}`} className="raw-response">
@@ -675,7 +694,7 @@ function App() {
     <div className="app">
       <div className="ar-status-indicator"></div>
       
-      <h1 className="header">ECHO</h1>
+      <h1 className="header">JARVIS</h1>
       
       {error && (
         <div className="error">
@@ -717,7 +736,7 @@ function App() {
       </div>
       
       <div className="main-container">
-        <div className="glass-panel">
+        <div className={`glass-panel ${isTranscribing ? 'state-active' : 'state-idle'}`}>
           <div className="panel-title">
             <div className="panel-icon">🎙️</div>
             Live Transcription
@@ -726,8 +745,8 @@ function App() {
             {renderTranscript}
           </div>
         </div>
-        
-        <div className="glass-panel">
+
+        <div className={`glass-panel ${isAnalyzing ? 'state-processing' : (aiSuggestions.length > 0 ? 'state-active' : 'state-idle')}`}>
           <div className="panel-title">
             <div className="panel-icon">🤖</div>
             AI Suggestions
@@ -740,8 +759,8 @@ function App() {
             {renderAISuggestions}
           </div>
         </div>
-        
-        <div className="glass-panel">
+
+        <div className={`glass-panel ${isRecognizing ? 'state-processing' : (personInfo ? 'state-active' : 'state-idle')}`}>
           <div className="panel-title">
             Research Face Recognition
           </div>

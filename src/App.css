@@ -150,8 +150,8 @@ html, body {
     inset 0 -1px 0 rgba(255, 255, 255, 0.1),
     0 0 0 1px rgba(255, 255, 255, 0.1),
     0 0 30px rgba(255, 0, 255, 0.15);
-  color: #ffffff;
-  font-weight: 600;
+  color: #F2F2F2;
+  font-weight: 700;
   padding: 8px 16px;
   font-size: 0.85rem;
   cursor: pointer;
@@ -159,7 +159,7 @@ html, body {
   position: relative;
   overflow: hidden;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
 }
 
 .toggle-button::before {
@@ -349,14 +349,14 @@ html, body {
 
 .panel-title {
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 700;
   margin-bottom: 12px;
-  color: #ffffff;
+  color: #F2F2F2;
   display: flex;
   align-items: center;
   gap: 8px;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
 }
 
 .panel-icon {
@@ -436,7 +436,8 @@ html, body {
   font-size: 0.85rem;
   line-height: 1.4;
   word-wrap: break-word;
-  color: rgba(255, 255, 255, 0.9);
+  color: #F2F2F2;
+  letter-spacing: 0.5px;
 }
 
 /* Person info panel - AR compact */
@@ -468,31 +469,34 @@ html, body {
 
 .person-name {
   font-size: 1.1rem;
-  font-weight: 600;
+  font-weight: 700;
   margin-bottom: 4px;
-  color: #ffffff;
+  color: #F2F2F2;
   text-align: center;
+  letter-spacing: 0.5px;
 }
 
 .person-job {
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: #A0A0A0;
   margin-bottom: 12px;
   text-align: center;
+  letter-spacing: 0.5px;
 }
 
 .detail-item {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: rgba(255, 255, 255, 0.8);
+  color: #F2F2F2;
   font-size: 0.8rem;
   padding: 4px 0;
+  letter-spacing: 0.5px;
 }
 
 .detail-label {
-  font-weight: 600;
-  color: rgba(0, 255, 255, 0.8);
+  font-weight: 700;
+  color: #A0A0A0;
   min-width: 60px;
 }
 
@@ -502,8 +506,8 @@ html, body {
   overflow-y: auto;
   padding-right: 8px;
   position: relative;
-  max-height: 300px; /* Fixed height to prevent expansion */
-  min-height: 200px; /* Minimum height to maintain layout */
+  display: flex;
+  flex-direction: column;
 }
 
 .ai-suggestions::before {
@@ -628,13 +632,15 @@ html, body {
   font-size: 0.85rem;
   line-height: 1.4;
   margin-bottom: 4px;
-  color: #ffffff;
+  color: #F2F2F2;
+  letter-spacing: 0.5px;
 }
 
 .suggestion-timestamp {
   font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: #A0A0A0;
   text-align: right;
+  letter-spacing: 0.5px;
 }
 
 /* Loading states - AR style */
@@ -643,8 +649,9 @@ html, body {
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: #A0A0A0;
   font-size: 0.85rem;
+  letter-spacing: 0.5px;
 }
 
 .loading-spinner {
@@ -668,9 +675,11 @@ html, body {
   border: 1px solid rgba(255, 0, 100, 0.3);
   border-radius: 12px;
   padding: 12px;
-  color: rgba(255, 255, 255, 0.9);
+  color: #F2F2F2;
   margin-bottom: 8px;
   font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
   backdrop-filter: blur(10px);
 }
 
@@ -689,11 +698,12 @@ html, body {
 }
 
 .speaker-legend h3 {
-  color: #ffffff;
+  color: #F2F2F2;
   font-size: 0.85rem;
+  font-weight: 700;
   margin-bottom: 8px;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
 }
 
 .speaker-chips {
@@ -711,6 +721,7 @@ html, body {
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 0.75rem;
+  letter-spacing: 0.5px;
   transition: all 0.2s ease;
 }
 
@@ -749,9 +760,10 @@ html, body {
 .raw-data-container h3 {
   margin: 0 0 12px 0;
   font-size: 0.85rem;
-  color: #ffffff;
+  font-weight: 700;
+  color: #F2F2F2;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
 }
 
 .raw-response {
@@ -773,6 +785,72 @@ html, body {
   white-space: pre-wrap;
   word-break: break-word;
   color: rgba(255, 255, 255, 0.7);
+}
+
+/* State Feedback System */
+.glass-panel.state-idle {
+  border-color: rgba(100, 120, 150, 0.3);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 2px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -2px 0 rgba(255, 255, 255, 0.05),
+    0 0 0 1px rgba(100, 120, 150, 0.2);
+}
+
+.glass-panel.state-active {
+  border-color: rgba(0, 255, 0, 0.5);
+  box-shadow:
+    0 8px 32px rgba(0, 255, 0, 0.3),
+    inset 0 2px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -2px 0 rgba(255, 255, 255, 0.05),
+    0 0 0 1px rgba(0, 255, 0, 0.3),
+    0 0 40px rgba(0, 255, 0, 0.2);
+  animation: activePulse 2s ease-in-out infinite;
+}
+
+.glass-panel.state-processing::before {
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(200, 0, 255, 0.6),
+    rgba(150, 0, 255, 0.6),
+    rgba(200, 0, 255, 0.6),
+    transparent);
+  animation: processingShimmer 2s ease-in-out infinite;
+  height: 3px;
+  filter: blur(2px);
+}
+
+@keyframes activePulse {
+  0%, 100% {
+    box-shadow:
+      0 8px 32px rgba(0, 255, 0, 0.3),
+      inset 0 2px 0 rgba(255, 255, 255, 0.15),
+      inset 0 -2px 0 rgba(255, 255, 255, 0.05),
+      0 0 0 1px rgba(0, 255, 0, 0.3),
+      0 0 30px rgba(0, 255, 0, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 8px 32px rgba(0, 255, 0, 0.5),
+      inset 0 2px 0 rgba(255, 255, 255, 0.2),
+      inset 0 -2px 0 rgba(255, 255, 255, 0.1),
+      0 0 0 2px rgba(0, 255, 0, 0.5),
+      0 0 50px rgba(0, 255, 0, 0.4);
+  }
+}
+
+@keyframes processingShimmer {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0.3;
+  }
 }
 
 /* Responsive design for AR glasses */
@@ -841,6 +919,24 @@ html, body {
 
 .fade-in {
   animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes slideInTop {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.95);
+  }
+  50% {
+    transform: translateY(5px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.slide-in-top {
+  animation: slideInTop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes pulse {
@@ -978,9 +1074,9 @@ html, body {
   text-align: center;
   color: #00ffff;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   animation: pulseText 2s ease-in-out infinite;
 }
 
@@ -1039,9 +1135,9 @@ html, body {
   border-radius: 20px;
   color: #00ff88;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
 }
 
 /* Camera preview styles */
