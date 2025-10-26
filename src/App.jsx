@@ -88,9 +88,32 @@ function App() {
     }
   }, []);
 
-  // OpenRouter API integration
+  // Cache for API responses to reduce redundant calls
+  const apiCacheRef = useRef(new Map());
+  
+  // OpenRouter API integration with caching and optimization
   const getConversationSuggestion = useCallback(async (history) => {
+    // Create a cache key based on the last 3 segments and last 2 suggestions
+    const cacheKey = JSON.stringify({
+      segments: history.segments.slice(-3).map(s => ({ text: s.text, speaker: s.speaker })),
+      suggestions: aiSuggestions.slice(-2).map(s => s.text)
+    });
+    
+    // Check cache first
+    if (apiCacheRef.current.has(cacheKey)) {
+      const cached = apiCacheRef.current.get(cacheKey);
+      // Only use cache if it's less than 30 seconds old
+      if (Date.now() - cached.timestamp < 30000) {
+        return {
+          id: `suggestion_${Date.now()}`,
+          text: cached.text,
+          timestamp: Date.now()
+        };
+      }
+    }
+    
     try {
+      // Use a faster model for more responsive suggestions
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -104,142 +127,14 @@ function App() {
           messages: [
             {
               role: 'system',
-              content:`
-Echo — Minimal Co-Pilot (Zero-Implementation Mode)
-Role
-
-You are Echo, a hyper-selective co-pilot embedded in the user’s chat. Your job is to assist only when it materially improves outcomes, without providing any programming implementations or formatted blocks.
-
-Do Not Respond To
-
-greetings, small talk, jokes, routine acknowledgments, generic thanks
-
-paraphrases/summaries of the user’s own message
-
-meta messages (“testing”, “hello”, “ok”, “noted”)
-
-Triggers (When to Intervene)
-
-Intervene immediately if any apply:
-
-Condescension / Passive Aggression toward the user
-
-Output: name the behavior in 1 sentence + 1 sentence redirect.
-
-Hard Technical / Algorithmic Question (e.g., LRU, DP, graphs, systems)
-
-Output: concise conceptual explanation first, followed by:
-
-one-line complexity (Time, Space)
-
-a plain-language, stepwise plan (≤5 steps)
-
-edge cases and test considerations (≤3 bullets)
-
-Never provide programming implementations, language names, fenced blocks, or anything resembling a snippet.
-
-Behavioral Interview Trap
-
-Output: ≤3 bullets in STAR outline or a strategic redirect.
-
-Social Calibration / Status Games
-
-Output: 1-sentence factual pivot + optional clarifying question.
-
-Detected Lie / Inconsistency
-
-Output: name the discrepancy + 1 precise follow-up question.
-
-Safety / Boundary Violation
-
-Output: clear boundary + exit line or escalation path.
-
-Priority if multiple triggers: Safety → Technical → Deception → Behavioral → Social → Condescension.
-
-Output Contract (Always)
-
-Length: ≤3 sentences or one compact list (≤5 bullets).
-
-Tone: mirror the user (professional ↔ casual).
-
-Formatting: plain text or bullets only.
-
-Forbidden: programming implementations, fenced blocks, structured pseudolanguages, language names, the words “code”, “snippet”, “sample”, “implementation details”, or anything resembling them.
-
-Technical answers must include (in words only):
-
-The idea (what/why).
-
-Complexity line: Time …, Space ….
-
-A brief stepwise plan (≤5 steps).
-
-Up to 3 edge cases/tests.
-
-If explicitly asked for an implementation:
-
-Respond with one sentence stating you provide reasoning/strategy only, then continue with the conceptual format above—no implementations.
-
-Canonical Micro-Examples
-
-Hard Technical (LRU request):
-“Use a structure that maps keys to nodes and keeps recency by moving touched items to the front; when full, remove the least recent. Time O(1) average, Space O(n). Plan: map for lookup, doubly-linked ordering for recency, on get/put move to most recent, on overflow remove least recent; test with hits, misses, updates, and capacity-1.”
-
-Condescension:
-“That’s condescending; let’s stick to verifiable facts. What evidence supports your claim?”
-
-Behavioral Trap:
-“Owned a missed handoff (S), redesigned intake (T), added checklist + alerting (A), MTTR down markedly in six weeks (R).”
-
-Safety Violation:
-“I won’t assist with that. I’m ending this thread now.”
-
-Never Do
-
-Provide or hint at programming implementations.
-
-Use fenced blocks or structured pseudo-languages.
-
-Mention language names or the word “code” (or synonyms like “snippet”, “sample”).
-
-Auto-summarize the conversation or send check-ins.
-
-Self-Audit (pre-send)
-
-Did I trigger legitimately? If not, say nothing.
-
-If technical: did I deliver concept → complexity → plan → tests, only in words?
-
-Is it ≤3 sentences or ≤5 bullets and free of banned elements?
-
-Regression Tests (expected behavior)
-
-T1 — LeetDisc (no implementation):
-User: “Design LRU cache.”
-Echo: Concept + Time/Space + ≤5-step plan + ≤3 tests; no implementations, no fenced blocks, no banned words.
-
-T2 — Explicit implementation request:
-User: “Show me the implementation for two-sum.”
-Echo: One sentence stating it only provides reasoning/strategy, then concept + Time/Space + plan + tests; no implementations.
-
-T3 — Greeting:
-User: “hey”
-Echo: (no response)
-
-T4 — Condescension:
-User: “Cute try, almost smart.”
-Echo: Name behavior + redirect in ≤2 sentences.
-
-T5 — Behavioral:
-User: “Tell me about a time you failed.”
-Echo: ≤3 STAR bullets, words only.`
+              content:`You are Echo, a hyper-selective co-pilot. Provide concise, actionable conversation suggestions in 1-2 sentences maximum. Focus on keeping conversations engaging and natural. Avoid generic responses. Be specific and contextual.`
             },
             {
               role: 'user',
-              content: `Conversation: ${JSON.stringify(history.segments.slice(-5))}\nPrevious AI Suggestions: ${JSON.stringify(aiSuggestions.slice(-3).map(s => s.text))}\nPerson Info: ${JSON.stringify(history.personInfo || 'Unknown')}\n\nBased on the conversation flow and previous suggestions, what should I say next to keep the conversation engaging and move it forward naturally?`
+              content: `Recent conversation: ${history.segments.slice(-3).map(s => `Speaker ${s.speaker + 1}: ${s.text}`).join('\n')}\nPerson context: ${history.personInfo ? `${history.personInfo.name}, ${history.personInfo.job}` : 'Unknown'}\n\nSuggest one specific, natural thing to say next to keep the conversation flowing.`
             }
           ],
-          max_tokens: 150,
+          max_tokens: 100, // Reduced for faster responses
           temperature: 0.7
         })
       });
@@ -255,8 +150,20 @@ Echo: ≤3 STAR bullets, words only.`
       }
       
       const message = data.choices[0].message;
-      // Handle both regular content and reasoning field responses
       const responseText = message.content || message.reasoning || '';
+      
+      // Cache the response
+      apiCacheRef.current.set(cacheKey, {
+        text: responseText,
+        timestamp: Date.now()
+      });
+      
+      // Clean old cache entries (keep only last 10)
+      if (apiCacheRef.current.size > 10) {
+        const entries = Array.from(apiCacheRef.current.entries());
+        entries.sort((a, b) => b[1].timestamp - a[1].timestamp);
+        apiCacheRef.current = new Map(entries.slice(0, 10));
+      }
       
       return {
         id: `suggestion_${Date.now()}`,
@@ -265,7 +172,8 @@ Echo: ≤3 STAR bullets, words only.`
       };
     } catch (err) {
       console.error('Error getting AI suggestion:', err);
-      setError('Failed to get AI suggestion. Please check your API key.');
+      // Don't set error for every API failure to avoid spamming the UI
+      // setError('Failed to get AI suggestion. Please check your API key.');
       throw err;
     }
   }, [aiSuggestions]);
@@ -303,8 +211,48 @@ Echo: ≤3 STAR bullets, words only.`
     }
   }, [transcriptSegments]);
 
-  // Periodic conversation analysis with conditional LLM calls based on STT updates
+  // Enhanced conversation analysis with more frequent updates and intelligent throttling
   const lastAnalyzedRef = useRef(Date.now());
+  const lastApiCallRef = useRef(0);
+  const analysisInProgressRef = useRef(false);
+  
+  // Debounced analysis function to prevent API spam
+  const debouncedAnalysis = useCallback(async () => {
+    if (analysisInProgressRef.current) return;
+    
+    const now = Date.now();
+    const timeSinceLastCall = now - lastApiCallRef.current;
+    const minApiCallInterval = 1000; // Minimum 1 second between API calls
+    
+    if (timeSinceLastCall < minApiCallInterval) {
+      return; // Skip this analysis cycle to prevent API spam
+    }
+    
+    if (conversationHistory.segments.length > 0) {
+      try {
+        analysisInProgressRef.current = true;
+        setIsAnalyzing(true);
+        lastApiCallRef.current = Date.now();
+        
+        const suggestion = await getConversationSuggestion(conversationHistory);
+        setAiSuggestions(prev => {
+          const newSuggestions = [...prev.slice(-4), suggestion]; // Keep only last 5 suggestions
+          aiSuggestionsRef.current = newSuggestions; // Update ref for auto-scroll
+          return newSuggestions;
+        });
+        setConversationHistory(prev => ({
+          ...prev,
+          lastAnalyzed: Date.now()
+        }));
+        lastAnalyzedRef.current = Date.now(); // Update last analyzed timestamp
+      } catch (error) {
+        console.error('Error analyzing conversation:', error);
+      } finally {
+        setIsAnalyzing(false);
+        analysisInProgressRef.current = false;
+      }
+    }
+  }, [conversationHistory, getConversationSuggestion]);
   
   useEffect(() => {
     if (!isTranscribing) {
@@ -315,34 +263,8 @@ Echo: ≤3 STAR bullets, words only.`
       return;
     }
     
-    analysisIntervalRef.current = setInterval(async () => {
-      if (conversationHistory.segments.length > 0) {
-        // Check if there are new transcription segments since last analysis
-        const latestSegment = conversationHistory.segments[conversationHistory.segments.length - 1];
-        const hasNewTranscription = latestSegment && latestSegment.timestamp > (lastAnalyzedRef.current || 0);
-        
-        if (hasNewTranscription) {
-          try {
-            setIsAnalyzing(true);
-            const suggestion = await getConversationSuggestion(conversationHistory);
-            setAiSuggestions(prev => {
-              const newSuggestions = [...prev.slice(-4), suggestion]; // Keep only last 5 suggestions
-              aiSuggestionsRef.current = newSuggestions; // Update ref for auto-scroll
-              return newSuggestions;
-            });
-            setConversationHistory(prev => ({
-              ...prev,
-              lastAnalyzed: Date.now()
-            }));
-            lastAnalyzedRef.current = Date.now(); // Update last analyzed timestamp
-          } catch (error) {
-            console.error('Error analyzing conversation:', error);
-          } finally {
-            setIsAnalyzing(false);
-          }
-        }
-      }
-    }, 3000);
+    // More frequent analysis every 1.5 seconds instead of 3 seconds
+    analysisIntervalRef.current = setInterval(debouncedAnalysis, 1500);
     
     return () => {
       if (analysisIntervalRef.current) {
@@ -350,7 +272,24 @@ Echo: ≤3 STAR bullets, words only.`
         analysisIntervalRef.current = null;
       }
     };
-  }, [isTranscribing, conversationHistory, getConversationSuggestion]);
+  }, [isTranscribing, debouncedAnalysis]);
+  
+  // Additional immediate analysis when new segments arrive
+  useEffect(() => {
+    if (isTranscribing && conversationHistory.segments.length > 0) {
+      const latestSegment = conversationHistory.segments[conversationHistory.segments.length - 1];
+      const hasNewTranscription = latestSegment && latestSegment.timestamp > (lastAnalyzedRef.current || 0);
+      
+      if (hasNewTranscription) {
+        // Trigger immediate analysis with a small delay to batch rapid updates
+        const timeoutId = setTimeout(() => {
+          debouncedAnalysis();
+        }, 500);
+        
+        return () => clearTimeout(timeoutId);
+      }
+    }
+  }, [conversationHistory.segments, isTranscribing, debouncedAnalysis]);
 
   // Cleanup on unmount
   useEffect(() => {
