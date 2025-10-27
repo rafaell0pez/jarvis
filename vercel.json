@@ -1,0 +1,12 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "vite",
+  "env": {
+    "VITE_DEEPGRAM_API_KEY": "@deepgram-api-key",
+    "VITE_OPENROUTER_API_KEY": "@openrouter-api-key",
+    "VITE_API_URL": "@api-url"
+  }
+}
