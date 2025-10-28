@@ -44,8 +44,16 @@ It helps you *remember people, recall context, and sound sharp — instantly.*
 - Deepgram + OpenRouter API keys  
 - Docker (optional)  
 
-### Frontend  
+### Frontend (Main Jarvis UI)
 ```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### Echo (Transcription App)
+```bash
+cd echo
 npm install
 npm run dev
 ```
@@ -63,19 +71,25 @@ Access the app at:
 
  
 
-## 📂 Project Structure  
+## 📂 Project Structure
+
+This is a monorepo containing multiple components:
 
 ```
 .
-├── src/           # React frontend
-│   ├── App.jsx
-│   ├── main.jsx
-│   └── styles/
+├── frontend/      # Main Jarvis UI (React + Vite)
+│   ├── src/
+│   ├── public/
+│   └── package.json
+├── echo/          # Real-time transcription app (React + Vite)
+│   ├── src/
+│   ├── public/
+│   └── package.json
 ├── backend/       # FastAPI service
 │   ├── app/
 │   ├── Dockerfile
 │   └── pyproject.toml
-└── public/        # Static assets
+└── docs/          # Documentation
 ```
 
  
