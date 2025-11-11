@@ -1,6 +1,5 @@
 # 🕶️ Jarvis — AI Networking Assistant for Meta Glasses  
 
- **“Because LinkedIn is for amateurs.”**  
 Jarvis transforms Meta Glasses into a real-time networking assistant — recognizing faces, recalling names, and generating AI-powered conversation cues during in-person interactions.
 
 
